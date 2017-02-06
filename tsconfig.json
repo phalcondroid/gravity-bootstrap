@@ -1,0 +1,17 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "target": "es5",
+        "module": "system",
+        "sourceMap": false,
+        "inlineSources": false,
+        "outFile" : "../wwd-backend/public/js/Libraries/gravity.bootstrap.js"
+    },
+    "filesGlob": [
+        "./*.ts",
+        "./**/*.ts",
+        "!./*.d.ts",
+        "!./**/*.d.ts",
+        "!./node_modules/**/*.ts"
+    ]
+}
