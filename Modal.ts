@@ -73,6 +73,12 @@ namespace Gravity
             this.footer = new View.Div(this.context);
             this.footer.class("modal-footer");
 
+            this.content.append([
+                this.header,
+                this.body,
+                this.footer
+            ]);
+
             this.modalDialog.append(
                 this.content
             );
@@ -97,12 +103,16 @@ namespace Gravity
             span.attr("aria-hidden", "true");
             span.setInnerHtml("&times");
             closeButton.append(span);
-
+            this.header.append([
+                closeButton
+            ]);
             if (title != "") {
                 var titleHeader = new View.H4(this.context);
                 titleHeader.class("modal-title");
                 titleHeader.append(title);
+                this.header.append(titleHeader);
             }
+
             return this;
         }
 
