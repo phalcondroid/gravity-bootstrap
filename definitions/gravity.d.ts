@@ -210,7 +210,7 @@ declare namespace Logic {
         getDi(): Service.Container;
     }
 }
-declare namespace Model {
+declare namespace ModelData {
     class RawModel {
         state: number;
         identify: string;
@@ -230,7 +230,7 @@ declare namespace Model {
         getIdentify(): string;
     }
 }
-declare namespace Model {
+declare namespace ModelData {
     class AjaxModel extends RawModel implements ModelInterface {
         source: string;
         insertUrl: string;
@@ -257,12 +257,12 @@ declare namespace Model {
         getMethod(): string;
     }
 }
-declare namespace Model {
+declare namespace ModelData {
     class Deny {
         static getDeny(): string[];
     }
 }
-declare namespace Model {
+declare namespace ModelData {
     interface ModelInterface {
         insertUrl: string;
         deleteUrl: string;
@@ -281,7 +281,7 @@ declare namespace Model {
         getDeleteUrl(): string;
     }
 }
-declare namespace Model {
+declare namespace ModelData {
     class StaticModel extends RawModel implements Service.InjectionAwareInterface {
         private index;
         private container;
@@ -428,6 +428,20 @@ declare namespace Network {
         static DELETE: string;
     }
 }
+declare namespace Paginator {
+    class Model {
+        private pages;
+        private context;
+        /**
+         *
+         */
+        constructor(context: any);
+        /**
+         *
+         */
+        getPages(): void;
+    }
+}
 declare namespace Eval {
 }
 declare namespace Persistence {
@@ -488,7 +502,6 @@ declare namespace Reflection {
 declare namespace Service {
     class Container {
         private service;
-        private persistent;
         set(serviceName: any, content: any): void;
         get(serviceName: any): any;
         setPersistent(serviceName: any, content: any): void;
@@ -616,13 +629,13 @@ declare namespace Persistence {
     }
     interface EntityManagerInterface extends Service.InjectionAwareInterface {
         uow: Object;
-        find(conext: any, model: Model.RawModel, params: Object): any;
-        findOne(context: any, model: Model.RawModel, params: Object): any;
-        count(context: any, model: Model.RawModel, params: Object): any;
-        distinct(context: any, model: Model.RawModel, params: Object): any;
-        group(context: any, model: Model.RawModel, params: Object): any;
-        save(context: any, model: Model.RawModel): any;
-        delete(context: any, model: Model.RawModel): any;
+        find(conext: any, model: ModelData.RawModel, params: Object): any;
+        findOne(context: any, model: ModelData.RawModel, params: Object): any;
+        count(context: any, model: ModelData.RawModel, params: Object): any;
+        distinct(context: any, model: ModelData.RawModel, params: Object): any;
+        group(context: any, model: ModelData.RawModel, params: Object): any;
+        save(context: any, model: ModelData.RawModel): any;
+        delete(context: any, model: ModelData.RawModel): any;
         forget(): any;
         flush(): any;
         purge(): any;
@@ -718,6 +731,14 @@ declare namespace View {
         /**
          *
          */
+        show(): this;
+        /**
+         *
+         */
+        hide(): this;
+        /**
+         *
+         */
         getById(id: string): any;
         /**
          *
@@ -755,6 +776,10 @@ declare namespace View {
          */
         addClass(attrClass: string): this;
         /**
+         * Set inner html throught
+         */
+        setInnerHtml(html: any): any;
+        /**
          *
          */
         getAttribute(attr: any): any;
@@ -769,6 +794,9 @@ declare namespace View {
          * @return {[type]}      [description]
          */
         click(fn: any): this;
+        /**
+         *
+         */
         doubleClick(fn: any): this;
         /**
          *
@@ -815,15 +843,28 @@ declare namespace View {
         /**
          *
          */
+        data(key: any, value?: boolean): this;
+        /**
+         *
+         */
         private checkAppendValue(append);
         /**
-         * [html description]
-         * @param  {[type]} html [description]
-         * @return {[type]}      [description]
+         *
+         * @param  html [description]
+         * @return
          */
         html(html?: any): any;
+        /**
+         *
+         */
         verifyElement(append: any, type?: string): void;
+        /**
+         *
+         */
         private removeChildNodes();
+        /**
+         *
+         */
         private removeChilds(element, childs);
         /**
          *
@@ -837,8 +878,8 @@ declare namespace View {
         getAttr(attr: any): any;
         /**
          * [css description]
-         * @param  {[type]} css [description]
-         * @return {[type]}     [description]
+         * @param   css [description]
+         * @return
          */
         css(css: any, value?: any): this;
         /**
@@ -899,7 +940,21 @@ declare namespace View {
          *
          */
         remove(element?: boolean): void;
+        /**
+         *
+         */
+        setId(id: any): this;
+        /**
+         *
+         */
+        getId(): any;
+        /**
+         *
+         */
         setDi(di: any): void;
+        /**
+         *
+         */
         getDi(): any;
     }
 }
@@ -2286,13 +2341,6 @@ declare namespace View {
          *
          */
         constructor(ctx: any);
-        /**
-         *
-         * @param
-         * @param
-         * @return
-         */
-        build(elements: any): void;
     }
 }
 declare namespace View {
@@ -2350,6 +2398,7 @@ declare namespace View {
 declare namespace View {
     class Controller implements Service.InjectionAwareInterface {
         di: Service.Container;
+        em: Persistence.EntityManager;
         /**
          *
          */

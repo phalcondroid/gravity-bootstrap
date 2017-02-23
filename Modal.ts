@@ -90,6 +90,24 @@ namespace Gravity
         /**
          *
          */
+        public setLarge()
+        {
+            this.modalDialog.class("modal-dialog modal-lg");
+            return this;
+        }
+
+        /**
+         *
+         */
+        public setSmall()
+        {
+            this.modalDialog.class("modal-dialog modal-sm");
+            return this;
+        }
+
+        /**
+         *
+         */
         public setHeader(title)
         {
             var closeButton = new View.Div(this.context);
