@@ -160,5 +160,11 @@ namespace Gravity
             $(this.element).modal("show");
             return this;
         }
+
+        public hide()
+        {
+            $(this.element).modal("hide");
+            return this;
+        }
     }
 }
