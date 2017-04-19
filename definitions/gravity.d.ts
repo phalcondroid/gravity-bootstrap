@@ -91,6 +91,12 @@ declare namespace Events {
         getListeners(): void;
     }
 }
+declare namespace Helper {
+    class ArrayHelper {
+        constructor();
+        static inArray(container: any[], element: any): boolean;
+    }
+}
 declare namespace Gravity {
     class Application {
         /**
@@ -116,6 +122,10 @@ declare namespace Gravity {
         /**
          *
          */
+        getConfig(): Object;
+        /**
+         *
+         */
         private resolveConfig(di);
         /**
          *
@@ -125,6 +135,7 @@ declare namespace Gravity {
          *
          */
         private resolveControllers(di, controllers);
+        private resolvePropertiesController(controller);
         /**
          *
          */
@@ -133,12 +144,6 @@ declare namespace Gravity {
          *
          */
         start(): void;
-    }
-}
-declare namespace Helper {
-    class ArrayHelper {
-        constructor();
-        static inArray(container: any[], element: any): boolean;
     }
 }
 declare namespace Helper {
@@ -258,30 +263,6 @@ declare namespace ModelData {
     }
 }
 declare namespace ModelData {
-    class Deny {
-        static getDeny(): string[];
-    }
-}
-declare namespace ModelData {
-    interface ModelInterface {
-        insertUrl: string;
-        deleteUrl: string;
-        updateUrl: string;
-        findUrl: string;
-        state: number;
-        internalId: string;
-        setSource(source: Object): void;
-        setFindUrl(url: string): void;
-        setInsertUrl(url: string): void;
-        setUpdateUrl(url: string): void;
-        setDeleteUrl(url: string): void;
-        getFindUrl(): string;
-        getInsertUrl(): string;
-        getUpdateUrl(): string;
-        getDeleteUrl(): string;
-    }
-}
-declare namespace ModelData {
     class StaticModel extends RawModel implements Service.InjectionAwareInterface {
         private index;
         private container;
@@ -322,6 +303,61 @@ declare namespace ModelData {
          *
          */
         getSerialized(): void;
+    }
+}
+declare namespace ModelData {
+    class AjaxModelPersistent extends StaticModel implements ModelInterface {
+        source: string;
+        insertUrl: string;
+        deleteUrl: string;
+        updateUrl: string;
+        findUrl: string;
+        params: Object;
+        internalId: string;
+        method: string;
+        setSource(data: any): void;
+        getClassName(): string;
+        setInsertUrl(url: string): void;
+        setFindUrl(url: string): void;
+        setDeleteUrl(url: string): void;
+        setUpdateUrl(url: string): void;
+        getInsertUrl(): string;
+        getFindUrl(): string;
+        getDeleteUrl(): string;
+        getUpdateUrl(): string;
+        setParams(params: Object): void;
+        getParams(): Object;
+        setMethod(method: string): void;
+        getMethod(): string;
+    }
+}
+declare namespace ModelData {
+    class Deny {
+        static getDeny(): string[];
+    }
+}
+declare namespace ModelData {
+    interface ModelInterface {
+        insertUrl: string;
+        deleteUrl: string;
+        updateUrl: string;
+        findUrl: string;
+        state: number;
+        internalId: string;
+        setSource(source: Object): void;
+        setFindUrl(url: string): void;
+        setInsertUrl(url: string): void;
+        setUpdateUrl(url: string): void;
+        setDeleteUrl(url: string): void;
+        getFindUrl(): string;
+        getInsertUrl(): string;
+        getUpdateUrl(): string;
+        getDeleteUrl(): string;
+    }
+}
+declare namespace Mvc {
+    class ViewModel {
+        constructor(element: string, data: Object);
     }
 }
 declare namespace Network {
@@ -428,20 +464,6 @@ declare namespace Network {
         static DELETE: string;
     }
 }
-declare namespace Paginator {
-    class Model {
-        private pages;
-        private context;
-        /**
-         *
-         */
-        constructor(context: any);
-        /**
-         *
-         */
-        getPages(): void;
-    }
-}
 declare namespace Eval {
 }
 declare namespace Persistence {
@@ -487,6 +509,7 @@ declare namespace Reflection {
         private methods;
         private attributes;
         constructor();
+        getName(obj: any): string;
         read(obj: any): string;
         getAtttributeAsObjects(obj: any): any[];
         /**
@@ -562,6 +585,9 @@ declare namespace Persistence {
         private model;
         private fnResponse;
         private resultSet;
+        /**
+         * Entity manager is a class
+         */
         constructor();
         /**
          *
@@ -569,12 +595,26 @@ declare namespace Persistence {
         private getContainer();
         /**
          *
+         * @param model
+         * @param params
          */
         find(model: any, params?: Object): this;
         /**
          *
+         * @param model
+         * @param params
          */
         findOne(model: any, params?: Object): this;
+        /**
+         *
+         * @param model
+         * @param params
+         */
+        count(model: any, params?: Object): this;
+        /**
+         *
+         */
+        setWhenIsModel(model: any, params: any, type: any): void;
         /**
          *
          */
@@ -591,6 +631,18 @@ declare namespace Persistence {
          *
          */
         response(fn: Function): this;
+        /**
+         *
+         */
+        checkModel(fn: any, type: any, model: any, objModel: any, params: any): void;
+        /**
+         *
+         */
+        private setResponseAjax(fn, type, model, params);
+        /**
+         *
+         */
+        setResponseStatic(fn: any, objModel: any, type: any, model: any, params: any): void;
         /**
          *
          */
@@ -611,10 +663,6 @@ declare namespace Persistence {
          *
          */
         distinct(): {};
-        /**
-         *
-         */
-        count(): number;
         /**
          *
          */
@@ -698,6 +746,10 @@ declare namespace View {
         /**
          *
          */
+        args: any;
+        /**
+         *
+         */
         private deny;
         /**
          * [url description]
@@ -715,6 +767,21 @@ declare namespace View {
          * @return {[type]}      [description]
          */
         constructor(name?: any, newClone?: boolean);
+        /**
+         *
+         */
+        getArguments(args: any): any[];
+        /**
+         *
+         */
+        setArgs(args: any): this;
+        /**
+         *
+         */
+        getArgs(): any;
+        /**
+         *
+         */
         initialize(): void;
         /**
          *
@@ -829,6 +896,10 @@ declare namespace View {
          */
         focus(fn: any): this;
         destroyEvent(event: any): void;
+        /**
+         *
+         */
+        removeAttr(attr: any): this;
         /**
          * [get description]
          * @return {[type]} [description]
@@ -966,7 +1037,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
         /**
          * [favIcon description]
          * @return {[type]} [description]
@@ -989,7 +1060,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1001,7 +1072,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1013,7 +1084,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1025,7 +1096,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1037,7 +1108,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1049,7 +1120,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1061,7 +1132,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1073,7 +1144,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1085,7 +1156,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1097,7 +1168,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1109,7 +1180,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1118,7 +1189,7 @@ declare namespace View {
      * @type {[type]}
      */
     class Body extends ViewElement {
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1130,7 +1201,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1141,7 +1212,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
         /**
          *
          * @param
@@ -1194,7 +1265,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1206,7 +1277,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1218,7 +1289,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1230,7 +1301,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1242,7 +1313,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1254,7 +1325,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1266,7 +1337,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1278,7 +1349,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1290,7 +1361,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1302,7 +1373,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1314,7 +1385,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1326,7 +1397,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1338,7 +1409,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1350,7 +1421,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1362,7 +1433,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1374,7 +1445,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1386,7 +1457,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1398,7 +1469,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1410,7 +1481,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1422,7 +1493,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1434,7 +1505,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1446,7 +1517,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1458,7 +1529,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1470,7 +1541,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1482,7 +1553,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1494,7 +1565,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1506,7 +1577,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1518,7 +1589,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1530,7 +1601,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1542,7 +1613,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1554,7 +1625,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1566,7 +1637,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1578,7 +1649,9 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
+        width(width: any): this;
+        height(height: any): this;
         src(src: any): this;
     }
 }
@@ -1591,7 +1664,15 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
+        /**
+         *
+         */
+        getValue(): any;
+        /**
+         *
+         */
+        setValue(value: any): this;
         /**
          * [type description]
          * @param  {[type]} type [description]
@@ -1609,7 +1690,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1621,7 +1702,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1633,7 +1714,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1645,7 +1726,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1657,7 +1738,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1669,7 +1750,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1681,7 +1762,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1693,7 +1774,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1705,7 +1786,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1717,7 +1798,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1729,7 +1810,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1741,7 +1822,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1753,7 +1834,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1765,7 +1846,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1777,7 +1858,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1789,7 +1870,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1801,7 +1882,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1813,7 +1894,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1825,7 +1906,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
         setValue(val: any): this;
         /**
          *
@@ -1850,7 +1931,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1862,7 +1943,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1874,7 +1955,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1886,7 +1967,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1898,7 +1979,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1910,7 +1991,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1922,7 +2003,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1934,7 +2015,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1946,7 +2027,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1958,7 +2039,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1970,7 +2051,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1982,7 +2063,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -1994,7 +2075,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2003,7 +2084,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
         /**
          *
          */
@@ -2033,7 +2114,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2045,7 +2126,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2057,7 +2138,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2069,7 +2150,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2081,7 +2162,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2093,7 +2174,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2116,7 +2197,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
         /**
          *
          */
@@ -2189,7 +2270,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2201,7 +2282,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
         /**
          *
          * @param  {[type]} num [description]
@@ -2225,7 +2306,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2237,7 +2318,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2249,7 +2330,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
         colspan(cols: any): this;
         /**
          *
@@ -2268,7 +2349,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2280,7 +2361,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2292,7 +2373,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2304,7 +2385,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2316,7 +2397,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2328,7 +2409,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2340,7 +2421,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2352,7 +2433,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2364,7 +2445,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2376,7 +2457,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2399,6 +2480,7 @@ declare namespace View {
     class Controller implements Service.InjectionAwareInterface {
         di: Service.Container;
         em: Persistence.EntityManager;
+        url: Service.Container;
         /**
          *
          */
@@ -2423,6 +2505,26 @@ declare namespace View {
          *
          */
         setDi(di: Service.Container): void;
+        /**
+         *
+         */
+        setUrl(url: any): void;
+        /**
+         *
+         */
+        getUrl(): Service.Container;
+    }
+}
+declare namespace View {
+    /**
+     * [ViewElement description]
+     * @type {[type]}
+     */
+    class Hr extends ViewElement {
+        /**
+         *
+         */
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2434,7 +2536,7 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
 declare namespace View {
@@ -2446,6 +2548,6 @@ declare namespace View {
         /**
          *
          */
-        constructor(ctx: any);
+        constructor(ctx: any, a1?: any, a2?: any, a3?: any, a4?: any, a5?: any);
     }
 }
